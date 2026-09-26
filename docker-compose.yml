@@ -1,0 +1,21 @@
+# docker compose up -d                 -> dashboard on http://localhost:8080 (needs TRADEBOT_API_TOKEN in .env)
+# docker compose --profile ai up -d    -> also runs Ollama for JEV (then: docker compose exec ollama ollama pull gpt-oss:20b)
+services:
+  tradebot:
+    build: .
+    ports: ["8080:8080"]
+    env_file: .env
+    volumes:
+      - ./data:/data
+      - ./config:/app/config:ro
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]
+    ports: ["11434:11434"]
+    volumes: ["ollama:/root/.ollama"]
+    restart: unless-stopped
+
+volumes:
+  ollama: {}

@@ -1,0 +1,76 @@
+# Copy to config/config.yaml. Secrets are referenced by ENV VAR NAME only (see .env.example).
+api:
+  host: 127.0.0.1
+  port: 8080
+  token_env: TRADEBOT_API_TOKEN
+
+notifications:
+  telegram_token_env: TELEGRAM_BOT_TOKEN
+  telegram_chat_id_env: TELEGRAM_CHAT_ID
+  discord_webhook_env: DISCORD_WEBHOOK_URL
+  events: [trade_open, trade_close, risk, error, jev]
+
+bots:
+  # 1) Research winner, paper trading on live Binance prices (no keys needed for paper)
+  - id: btc-tsmom-paper
+    name: BTC trend (TSMOM, paper)
+    strategy: TrendVolTarget
+    symbols: [BTC/USDT]
+    timeframe: 1d
+    mode: paper
+    capital: 10000
+    exchange: {id: binance, market_type: spot}
+    costs: {fee_maker: 0.001, fee_taker: 0.001, slippage_bps: 5}
+    risk:
+      max_drawdown_pct: 30        # kill switch -> HALTED (manual re-arm)
+      daily_loss_limit_pct: 6     # pause new entries for the rest of the UTC day
+      max_position_pct: 1.0
+      protections:
+        - {method: CooldownPeriod, stop_minutes: 1440}
+
+  # 2) Turtle breakout on 4h candles
+  - id: btc-turtle-4h-paper
+    name: BTC Turtle 4h (paper)
+    strategy: DonchianBreakout
+    symbols: [BTC/USDT]
+    timeframe: 4h
+    mode: paper
+    capital: 10000
+    exchange: {id: binance, market_type: spot}
+    hp: {entry: 55, exit: 20, atr_stop: 3.0}
+    risk:
+      protections:
+        - {method: StoplossGuard, lookback_minutes: 2880, trade_limit: 3, stop_minutes: 1440}
+
+  # 3) JEV - the open-source decision AI (Ollama + gpt-oss), veto authority
+  - id: jev-btc-paper
+    name: JEV decision AI (paper)
+    strategy: JEVStrategy
+    symbols: [BTC/USDT]
+    timeframe: 1d
+    mode: paper
+    capital: 10000
+    exchange: {id: binance, market_type: spot}
+    jev:
+      enabled: true
+      base_url: http://localhost:11434/v1   # docker compose: http://ollama:11434/v1
+      model: gpt-oss:20b                    # or qwen3:8b, llama3.1:8b, deepseek-r1:8b ...
+      authority: veto                       # advisory | veto | full
+      reasoning_effort: medium
+      anonymize: true
+
+  # 4) LIVE example - disabled by default. Start on the exchange TESTNET (sandbox: true).
+  # - id: btc-tsmom-live
+  #   name: BTC trend (LIVE)
+  #   strategy: TrendVolTarget
+  #   symbols: [BTC/USDT]
+  #   timeframe: 1d
+  #   mode: live
+  #   capital: 500                # capital allocated to this bot (not your whole account)
+  #   exchange:
+  #     id: binance
+  #     market_type: spot
+  #     api_key_env: BINANCE_API_KEY
+  #     secret_env: BINANCE_API_SECRET
+  #     sandbox: true
+  #   risk: {max_drawdown_pct: 20, daily_loss_limit_pct: 5, flatten_on_halt: false}

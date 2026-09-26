@@ -1,0 +1,32 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Local data, databases, caches (download with `tradebot data free`)
+data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+
+# Secrets & local config
+.env
+config/config.yaml
+
+# Dashboard
+dashboard/node_modules/
+dashboard/dist/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.log
+.claude/settings.local.json
