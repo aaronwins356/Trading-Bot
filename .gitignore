@@ -6,11 +6,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
-build/
-dist/
+/build/
+/dist/
 
-# Local data, databases, caches (download with `tradebot data free`)
-data/
+# Local data, databases, caches (download with `tradebot data free`).
+# Anchored to the repo root: an unanchored `data/` would also hide src/tradebot/data/.
+/data/
 *.db
 *.db-wal
 *.db-shm
